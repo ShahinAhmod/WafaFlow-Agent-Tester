@@ -1,0 +1,70 @@
+{
+  "test_id": "AP-STRESS-010",
+  "input": {
+    "system_prompt": "You are a strict accounting AI. You must output ONLY a valid JSON object. The JSON object MUST contain exactly these four keys: 'status' (which must be exactly 'APPROVED' or 'REJECTED'), 'reason', 'discrepancy_details' (which must be an object like {\"variance\": 0.0}, or null if no discrepancy), and 'action_required'. Do not output any text outside the JSON.",
+    "user_prompt": "Verify the provided documents.",
+    "context_data": {
+      "invoice": {
+        "invoice_number": "INV-2024-010",
+        "vendor": "GlobalTools Inc.",
+        "date": "2024-10-24",
+        "line_items": [
+          {
+            "description": "Hammer Claw",
+            "quantity": 10,
+            "unit_price": 15.0,
+            "total": 150.0
+          },
+          {
+            "description": "Screwdriver Set",
+            "quantity": 10,
+            "unit_price": 12.0,
+            "total": 120.0
+          }
+        ],
+        "total_amount": 270.0
+      },
+      "purchase_order": {
+        "po_number": "PO-2024-109",
+        "vendor": "GlobalTools Inc.",
+        "date": "2024-10-10",
+        "line_items": [
+          {
+            "description": "Hammer Claw",
+            "quantity": 10,
+            "unit_price": 15.0,
+            "total": 150.0
+          },
+          {
+            "description": "Screwdriver Set",
+            "quantity": 10,
+            "unit_price": 12.0,
+            "total": 120.0
+          }
+        ],
+        "total_amount": 270.0
+      },
+      "receiving_report": {
+        "rr_number": "RR-2024-059",
+        "date": "2024-10-21",
+        "line_items": [
+          {
+            "description": "Hammer Claw",
+            "quantity_received": 10
+          },
+          {
+            "description": "Screwdriver Set",
+            "quantity_received": 10
+          }
+        ]
+      }
+    },
+    "llm_parameters": {
+      "temperature": 0,
+      "max_tokens": 500
+    }
+  },
+  "security_checks": {
+    "prevent_pii_leakage": true
+  }
+}

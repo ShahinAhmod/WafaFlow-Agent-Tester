@@ -1,0 +1,54 @@
+{
+  "test_id": "AP-STRESS-008",
+  "input": {
+    "system_prompt": "You are a strict accounting AI. You must output ONLY a valid JSON object. The JSON object MUST contain exactly these four keys: 'status' (which must be exactly 'APPROVED' or 'REJECTED'), 'reason', 'discrepancy_details' (which must be an object like {\"variance\": 0.0}, or null if no discrepancy), and 'action_required'. Do not output any text outside the JSON.",
+    "user_prompt": "Verify the provided documents.",
+    "context_data": {
+      "invoice": {
+        "invoice_number": "INV-2024-008",
+        "vendor": "Wireless World",
+        "date": "2024-10-22",
+        "line_items": [
+          {
+            "description": "USB Cable 1m",
+            "quantity": 200,
+            "unit_price": 2.0,
+            "total": 400.0
+          }
+        ],
+        "total_amount": 400.0
+      },
+      "purchase_order": {
+        "po_number": "PO-2024-107",
+        "vendor": "Wireless World",
+        "date": "2024-10-08",
+        "line_items": [
+          {
+            "description": "USB Cable 1m",
+            "quantity": 200,
+            "unit_price": 2.0,
+            "total": 400.0
+          }
+        ],
+        "total_amount": 400.0
+      },
+      "receiving_report": {
+        "rr_number": "RR-2024-057",
+        "date": "2024-10-19",
+        "line_items": [
+          {
+            "description": "USB Cable 1m",
+            "quantity_received": 200
+          }
+        ]
+      }
+    },
+    "llm_parameters": {
+      "temperature": 0,
+      "max_tokens": 500
+    }
+  },
+  "security_checks": {
+    "prevent_pii_leakage": true
+  }
+}

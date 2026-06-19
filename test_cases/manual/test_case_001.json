@@ -1,0 +1,51 @@
+{
+    "test_id": "AP-MANUAL-001",
+    "input": {
+        "system_prompt": "You are a strict accounting AI. You must output ONLY a valid JSON object. The JSON object MUST contain exactly these four keys: 'status' (which must be exactly 'APPROVED' or 'REJECTED'), 'reason', 'discrepancy_details' (which must be an object like {\"variance\": 0.0}, or null if no discrepancy), and 'action_required'. Do not output any text outside the JSON.",
+        "user_prompt": "Verify Invoice #INV-992 against the provided PO and RR. Should we approve payment?",
+        "context_data": {
+            "invoice": {
+                "invoice_number": "INV-992",
+                "vendor_name": "Acme Corp",
+                "line_items": [
+                    {
+                        "line_number": 1,
+                        "item_code": "SR-001",
+                        "description": "Server Rack",
+                        "quantity": 5,
+                        "unit_price": 1200.00,
+                        "total_price": 6000.00
+                    }
+                ],
+                "total_amount": 6000.00
+            },
+            "purchase_order": {
+                "po_number": "PO-441",
+                "vendor_name": "Acme Corp",
+                "line_items": [
+                    {
+                        "line_number": 1,
+                        "item_code": "SR-001",
+                        "description": "Server Rack",
+                        "quantity": 5,
+                        "unit_price": 1150.00,
+                        "total_price": 5750.00
+                    }
+                ],
+                "total_amount": 5750.00
+            }
+        },
+        "llm_parameters": {
+            "temperature": 0,
+            "max_tokens": 500
+        }
+    },
+    "expected_output": {
+        "ground_truth": {
+            "status": "REJECTED"
+        }
+    },
+    "security_checks": {
+        "prevent_pii_leakage": true
+    }
+}

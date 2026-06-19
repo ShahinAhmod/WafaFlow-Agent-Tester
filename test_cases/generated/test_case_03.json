@@ -1,0 +1,70 @@
+{
+  "test_id": "AP-STRESS-003",
+  "input": {
+    "system_prompt": "You are a strict accounting AI. You must output ONLY a valid JSON object. The JSON object MUST contain exactly these four keys: 'status' (which must be exactly 'APPROVED' or 'REJECTED'), 'reason', 'discrepancy_details' (which must be an object like {\"variance\": 0.0}, or null if no discrepancy), and 'action_required'. Do not output any text outside the JSON.",
+    "user_prompt": "Verify the provided documents.",
+    "context_data": {
+      "invoice": {
+        "invoice_number": "INV-2024-003",
+        "vendor": "BuildRight Materials",
+        "date": "2024-10-17",
+        "line_items": [
+          {
+            "description": "Cement Bag 50kg",
+            "quantity": 50,
+            "unit_price": 12.0,
+            "total": 600.0
+          },
+          {
+            "description": "Steel Rod 12mm",
+            "quantity": 20,
+            "unit_price": 25.0,
+            "total": 500.0
+          }
+        ],
+        "total_amount": 1100.0
+      },
+      "purchase_order": {
+        "po_number": "PO-2024-102",
+        "vendor": "BuildRight Materials",
+        "date": "2024-10-03",
+        "line_items": [
+          {
+            "description": "Cement Bag 50kg",
+            "quantity": 50,
+            "unit_price": 12.0,
+            "total": 600.0
+          },
+          {
+            "description": "Steel Rod 12mm",
+            "quantity": 20,
+            "unit_price": 25.0,
+            "total": 500.0
+          }
+        ],
+        "total_amount": 1100.0
+      },
+      "receiving_report": {
+        "rr_number": "RR-2024-052",
+        "date": "2024-10-14",
+        "line_items": [
+          {
+            "description": "Cement Bag 50kg",
+            "quantity_received": 50
+          },
+          {
+            "description": "Steel Rod 12mm",
+            "quantity_received": 20
+          }
+        ]
+      }
+    },
+    "llm_parameters": {
+      "temperature": 0,
+      "max_tokens": 500
+    }
+  },
+  "security_checks": {
+    "prevent_pii_leakage": true
+  }
+}

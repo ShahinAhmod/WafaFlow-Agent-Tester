@@ -1,0 +1,86 @@
+{
+  "test_id": "AP-STRESS-001",
+  "input": {
+    "system_prompt": "You are a strict accounting AI. You must output ONLY a valid JSON object. The JSON object MUST contain exactly these four keys: 'status' (which must be exactly 'APPROVED' or 'REJECTED'), 'reason', 'discrepancy_details' (which must be an object like {\"variance\": 0.0}, or null if no discrepancy), and 'action_required'. Do not output any text outside the JSON.",
+    "user_prompt": "Verify the provided documents.",
+    "context_data": {
+      "invoice": {
+        "invoice_number": "INV-2024-001",
+        "vendor": "OfficeSupply Co.",
+        "date": "2024-10-15",
+        "line_items": [
+          {
+            "description": "Printer Paper A4",
+            "quantity": 5000,
+            "unit_price": 2.5,
+            "total": 12500.0
+          },
+          {
+            "description": "Stapler Red",
+            "quantity": 5000,
+            "unit_price": 1.2,
+            "total": 6000.0
+          },
+          {
+            "description": "Pens Blue Box",
+            "quantity": 5000,
+            "unit_price": 0.75,
+            "total": 3750.0
+          }
+        ],
+        "total_amount": 22250.0
+      },
+      "purchase_order": {
+        "po_number": "PO-2024-100",
+        "vendor": "OfficeSupply Co.",
+        "date": "2024-10-01",
+        "line_items": [
+          {
+            "description": "Printer Paper A4",
+            "quantity": 5000,
+            "unit_price": 2.5,
+            "total": 12500.0
+          },
+          {
+            "description": "Stapler Red",
+            "quantity": 5000,
+            "unit_price": 1.2,
+            "total": 6000.0
+          },
+          {
+            "description": "Pens Blue Box",
+            "quantity": 5000,
+            "unit_price": 0.75,
+            "total": 3750.0
+          }
+        ],
+        "total_amount": 22250.0
+      },
+      "receiving_report": {
+        "rr_number": "RR-2024-050",
+        "date": "2024-10-12",
+        "line_items": [
+          {
+            "description": "Printer Paper A4",
+            "quantity_received": 5000
+          },
+          {
+            "description": "Stapler Red",
+            "quantity_received": 5000
+          },
+          {
+            "description": "Pens Blue Box",
+            "quantity_received": 5000
+          }
+        ]
+      }
+    },
+    "llm_parameters": {
+      "temperature": 0,
+      "max_tokens": 500
+    }
+  },
+  "security_checks": {
+    "prevent_pii_leakage": true
+  }
+}

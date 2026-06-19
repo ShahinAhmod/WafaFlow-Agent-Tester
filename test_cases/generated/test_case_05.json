@@ -1,0 +1,86 @@
+{
+  "test_id": "AP-STRESS-005",
+  "input": {
+    "system_prompt": "You are a strict accounting AI. You must output ONLY a valid JSON object. The JSON object MUST contain exactly these four keys: 'status' (which must be exactly 'APPROVED' or 'REJECTED'), 'reason', 'discrepancy_details' (which must be an object like {\"variance\": 0.0}, or null if no discrepancy), and 'action_required'. Do not output any text outside the JSON.",
+    "user_prompt": "Verify the provided documents.",
+    "context_data": {
+      "invoice": {
+        "invoice_number": "INV-2024-005",
+        "vendor": "AutoParts Ltd.",
+        "date": "2024-10-19",
+        "line_items": [
+          {
+            "description": "Oil Filter",
+            "quantity": 5,
+            "unit_price": 15.0,
+            "total": 75.0
+          },
+          {
+            "description": "Brake Pads Set",
+            "quantity": 2,
+            "unit_price": 45.0,
+            "total": 90.0
+          },
+          {
+            "description": "Spark Plug",
+            "quantity": 8,
+            "unit_price": 8.0,
+            "total": 64.0
+          }
+        ],
+        "total_amount": 229.0
+      },
+      "purchase_order": {
+        "po_number": "PO-2024-104",
+        "vendor": "AutoParts Ltd.",
+        "date": "2024-10-05",
+        "line_items": [
+          {
+            "description": "Oil Filter",
+            "quantity": 5,
+            "unit_price": 15.0,
+            "total": 75.0
+          },
+          {
+            "description": "Brake Pads Set",
+            "quantity": 2,
+            "unit_price": 45.0,
+            "total": 90.0
+          },
+          {
+            "description": "Spark Plug",
+            "quantity": 8,
+            "unit_price": 8.0,
+            "total": 64.0
+          }
+        ],
+        "total_amount": 229.0
+      },
+      "receiving_report": {
+        "rr_number": "RR-2024-054",
+        "date": "2024-10-16",
+        "line_items": [
+          {
+            "description": "Oil Filter",
+            "quantity_received": 5
+          },
+          {
+            "description": "Brake Pads Set",
+            "quantity_received": 2
+          },
+          {
+            "description": "Spark Plug",
+            "quantity_received": 8
+          }
+        ]
+      }
+    },
+    "llm_parameters": {
+      "temperature": 0,
+      "max_tokens": 500
+    }
+  },
+  "security_checks": {
+    "prevent_pii_leakage": true
+  }
+}

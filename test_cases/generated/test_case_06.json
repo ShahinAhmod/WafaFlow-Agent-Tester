@@ -1,0 +1,54 @@
+{
+  "test_id": "AP-STRESS-006",
+  "input": {
+    "system_prompt": "You are a strict accounting AI. You must output ONLY a valid JSON object. The JSON object MUST contain exactly these four keys: 'status' (which must be exactly 'APPROVED' or 'REJECTED'), 'reason', 'discrepancy_details' (which must be an object like {\"variance\": 0.0}, or null if no discrepancy), and 'action_required'. Do not output any text outside the JSON.",
+    "user_prompt": "Verify the provided documents.",
+    "context_data": {
+      "invoice": {
+        "invoice_number": "INV-2024-006",
+        "vendor": "Printing Press Corp",
+        "date": "2024-10-20",
+        "line_items": [
+          {
+            "description": "Brochure Printing",
+            "quantity": 1000,
+            "unit_price": 0.5,
+            "total": 500.0
+          }
+        ],
+        "total_amount": 500.0
+      },
+      "purchase_order": {
+        "po_number": "PO-2024-105",
+        "vendor": "Printing Press Corp",
+        "date": "2024-10-06",
+        "line_items": [
+          {
+            "description": "Brochure Printing",
+            "quantity": 1000,
+            "unit_price": 0.5,
+            "total": 500.0
+          }
+        ],
+        "total_amount": 500.0
+      },
+      "receiving_report": {
+        "rr_number": "RR-2024-055",
+        "date": "2024-10-17",
+        "line_items": [
+          {
+            "description": "Brochure Printing",
+            "quantity_received": 1000
+          }
+        ]
+      }
+    },
+    "llm_parameters": {
+      "temperature": 0,
+      "max_tokens": 500
+    }
+  },
+  "security_checks": {
+    "prevent_pii_leakage": true
+  }
+}
