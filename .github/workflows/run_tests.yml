@@ -23,7 +23,10 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install openai pydantic
+        run: pip install openai pydantic pytest
+
+      - name: Unit test core engines
+        run: pytest test_core_engines.py -v
 
       - name: Run test suite
         env:
