@@ -2,6 +2,7 @@ import streamlit as st
 import json
 import os
 import pandas as pd
+import math
 
 HISTORY_FILE = "results_history.json"
 
@@ -29,16 +30,21 @@ else:
     st.line_chart(chart_df, y="pass_rate", use_container_width=True)
 
     # Summary table of all runs
-    display_cols = ["run_id", "timestamp", "total", "passed", "failed", "pass_rate"]
+    base_cols = ["run_id", "timestamp", "total", "passed", "failed", "pass_rate"]
+    perf_cols = [c for c in ["avg_latency_ms", "total_tokens", "total_cost_usd"] if c in df.columns]
+    display_cols = base_cols + perf_cols
     display_df = df[display_cols].copy()
     display_df["timestamp"] = display_df["timestamp"].dt.strftime("%Y-%m-%d %H:%M:%S")
     display_df = display_df.rename(columns={
-        "run_id": "Run ID",
-        "timestamp": "Timestamp",
-        "total": "Total",
-        "passed": "Passed",
-        "failed": "Failed",
-        "pass_rate": "Pass Rate (%)",
+        "run_id":          "Run ID",
+        "timestamp":       "Timestamp",
+        "total":           "Total",
+        "passed":          "Passed",
+        "failed":          "Failed",
+        "pass_rate":       "Pass Rate (%)",
+        "avg_latency_ms":  "Avg Latency (ms)",
+        "total_tokens":    "Total Tokens",
+        "total_cost_usd":  "Est. Cost ($)",
     })
     st.dataframe(display_df, use_container_width=True, hide_index=True)
 
@@ -63,6 +69,26 @@ else:
     col2.metric("Passed ✅", data["passed"])
     col3.metric("Failed ❌", data["failed"])
     col4.metric("Pass Rate", f"{pass_rate}%")
+
+    # ── Performance Metrics ─────────────────────────────────────────────
+    perf = data.get("performance", {})
+    if perf and perf.get("total_tokens", 0) > 0:
+        st.markdown("**Performance**")
+        pc1, pc2, pc3, pc4 = st.columns(4)
+        pc1.metric("Avg Latency",   f"{perf.get('avg_latency_ms', 0)} ms")
+        pc2.metric("Total Tokens",  f"{perf.get('total_tokens', 0):,}")
+        pc3.metric("Est. Cost",     f"${perf.get('total_cost_usd', 0):.5f}")
+        pc4.metric("Slowest Test",  f"{perf.get('max_latency_ms', 0)} ms")
+
+        # Per-test latency bar chart
+        latencies = [
+            {"test": t["test_file"], "latency_ms": t.get("performance", {}).get("latency_ms", 0)}
+            for t in data["details"]
+            if t.get("performance", {}).get("latency_ms", 0) > 0
+        ]
+        if latencies:
+            lat_df = pd.DataFrame(latencies).set_index("test")
+            st.bar_chart(lat_df, use_container_width=True)
 
     # Per-agent-type breakdown
     by_type = data.get("by_agent_type", {})
@@ -157,6 +183,15 @@ else:
 
             if test.get("error"):
                 st.error(f"Engine error: {test['error']}")
+
+            # ── Per-test performance ────────────────────────────────────
+            tp = test.get("performance", {})
+            if tp and tp.get("total_tokens", 0) > 0:
+                st.markdown("**Performance**")
+                lc1, lc2, lc3 = st.columns(3)
+                lc1.metric("Latency",      f"{tp.get('latency_ms', 0)} ms")
+                lc2.metric("Tokens",       f"{tp.get('total_tokens', 0):,}")
+                lc3.metric("Est. Cost",    f"${tp.get('cost_usd', 0):.5f}")
 
             st.divider()
 

@@ -1,8 +1,13 @@
 import os
 import json
+import time
 from typing import Optional
 from openai import OpenAI
 from pydantic import BaseModel, ValidationError
+
+# DeepSeek V3 pricing (USD per 1M tokens)
+COST_PER_M_INPUT  = 0.27
+COST_PER_M_OUTPUT = 1.10
 
 from core_engine import calculate_ap_match
 from core_tax_engine import calculate_tax
@@ -138,12 +143,28 @@ def run_test_case(test_case_path: str) -> dict:
     ]
 
     print("Calling DeepSeek API...")
+    t_start  = time.perf_counter()
     response = client.chat.completions.create(
         model="deepseek-chat",
         messages=messages,
         temperature=test_case["input"]["llm_parameters"]["temperature"],
         max_tokens=test_case["input"]["llm_parameters"]["max_tokens"],
     )
+    latency_ms = round((time.perf_counter() - t_start) * 1000)
+
+    usage            = response.usage
+    prompt_tokens    = usage.prompt_tokens    if usage else 0
+    completion_tokens= usage.completion_tokens if usage else 0
+    total_tokens     = usage.total_tokens      if usage else 0
+    cost_usd         = round(
+        (prompt_tokens / 1_000_000) * COST_PER_M_INPUT +
+        (completion_tokens / 1_000_000) * COST_PER_M_OUTPUT,
+        6
+    )
+
+    print(f"⏱  Latency: {latency_ms}ms | "
+          f"Tokens: {prompt_tokens} in / {completion_tokens} out | "
+          f"Cost: ${cost_usd:.5f}")
 
     ai_response_text = response.choices[0].message.content
     print(f"AI Raw Response:\n{ai_response_text}\n")
@@ -225,24 +246,40 @@ def run_test_case(test_case_path: str) -> dict:
         else:
             ai_fields["discrepancy_details"] = parsed_result.discrepancy_details
 
+        perf = {
+            "latency_ms":         latency_ms,
+            "prompt_tokens":      prompt_tokens,
+            "completion_tokens":  completion_tokens,
+            "total_tokens":       total_tokens,
+            "cost_usd":           cost_usd,
+        }
         return {
             "passed": all_passed,
             "agent_type": agent_type,
             "checks": checks,
             "deterministic_truth": ground_truth,
             "ai_response": ai_fields,
+            "performance": perf,
             "error": None,
         }
 
     except ValidationError as e:
         checks["schema_valid"] = {"passed": False, "detail": str(e)}
         print(f"❌ SCHEMA INVALID: {e}")
+        perf = {
+            "latency_ms":         latency_ms,
+            "prompt_tokens":      prompt_tokens,
+            "completion_tokens":  completion_tokens,
+            "total_tokens":       total_tokens,
+            "cost_usd":           cost_usd,
+        }
         return {
             "passed": False,
             "agent_type": agent_type,
             "checks": checks,
             "deterministic_truth": ground_truth,
             "ai_response": {"raw": ai_response_text},
+            "performance": perf,
             "error": f"ValidationError: {e}",
         }
 
