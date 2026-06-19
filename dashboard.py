@@ -64,10 +64,35 @@ else:
     col3.metric("Failed ❌", data["failed"])
     col4.metric("Pass Rate", f"{pass_rate}%")
 
+    # Per-agent-type breakdown
+    by_type = data.get("by_agent_type", {})
+    if by_type:
+        st.markdown("**By Agent Type**")
+        AGENT_LABELS = {
+            "ap_match":        "AP 3-Way Match",
+            "tax_calculation": "Tax Calculation",
+            "payroll":         "Payroll",
+        }
+        type_cols = st.columns(len(by_type))
+        for col, (atype, counts) in zip(type_cols, by_type.items()):
+            t = counts["passed"] + counts["failed"]
+            rate = round(counts["passed"] / t * 100, 1) if t else 0
+            label = AGENT_LABELS.get(atype, atype)
+            col.metric(label, f"{counts['passed']}/{t}", f"{rate}% pass")
+
     st.divider()
 
     # Detailed Test Cases
     st.subheader("📂 Test Case Details")
+
+    # Agent type filter
+    all_types = sorted({t.get("agent_type", "ap_match") for t in data["details"]})
+    AGENT_LABELS = {"ap_match": "AP 3-Way Match", "tax_calculation": "Tax Calculation", "payroll": "Payroll"}
+    filter_options = ["All"] + [AGENT_LABELS.get(t, t) for t in all_types]
+    selected_label = st.selectbox("Filter by agent type:", filter_options)
+    selected_type  = None if selected_label == "All" else next(
+        (k for k, v in AGENT_LABELS.items() if v == selected_label), selected_label
+    )
 
     CHECK_LABELS = {
         "schema_valid":   "Schema Valid",
@@ -76,8 +101,14 @@ else:
         "security_clean": "Security / PII",
     }
 
-    for test in data["details"]:
-        with st.expander(f"{test['status']} — {test['test_file']}"):
+    filtered = [
+        t for t in data["details"]
+        if selected_type is None or t.get("agent_type", "ap_match") == selected_type
+    ]
+
+    for test in filtered:
+        atype_label = AGENT_LABELS.get(test.get("agent_type", "ap_match"), test.get("agent_type", ""))
+        with st.expander(f"{test['status']} — {test['test_file']}  `{atype_label}`"):
             st.write(f"**Folder:** `{test['folder']}`")
 
             # ── Per-check breakdown (new) ───────────────────────────────

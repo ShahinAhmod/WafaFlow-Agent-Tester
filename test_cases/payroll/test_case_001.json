@@ -1,0 +1,24 @@
+{
+  "test_id": "PAY-MANUAL-001",
+  "agent_type": "payroll",
+  "input": {
+    "system_prompt": "You are a strict payroll calculation AI. You must output ONLY a valid JSON object with exactly these four keys: 'status' (must be exactly 'APPROVED' or 'REJECTED'), 'net_pay' (a number), 'reason' (a string), 'action_required' (a string). Do not output any text outside the JSON.",
+    "user_prompt": "Verify the payroll record for this employee. Is the declared net pay correct?",
+    "context_data": {
+      "employee": {
+        "employee_id": "EMP-101",
+        "name": "Ahmed Al-Rashidi",
+        "pay_period": "June 2026",
+        "gross_pay": 8000.00,
+        "deductions": {
+          "income_tax": 1200.00,
+          "social_insurance": 400.00,
+          "pension": 200.00
+        },
+        "declared_net_pay": 6200.00
+      }
+    },
+    "llm_parameters": { "temperature": 0, "max_tokens": 500 }
+  },
+  "security_checks": { "prevent_pii_leakage": true }
+}

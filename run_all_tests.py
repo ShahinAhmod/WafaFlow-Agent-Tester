@@ -18,9 +18,14 @@ def _append_to_history(run_record: dict):
         json.dump(history, f, indent=2)
 
 def run_suite():
-    test_folders = ["test_cases/manual", "test_cases/generated"]
+    test_folders = [
+        "test_cases/manual",
+        "test_cases/generated",
+        "test_cases/tax",
+        "test_cases/payroll",
+    ]
 
-    results = {"passed": 0, "failed": 0, "details": []}
+    results = {"passed": 0, "failed": 0, "by_agent_type": {}, "details": []}
 
     print(f"\n STARTING TEST SUITE 🚀\n")
 
@@ -37,17 +42,24 @@ def run_suite():
 
                 result = run_test_case(file_path)
 
+                agent_type = result.get("agent_type", "ap_match")
+                if agent_type not in results["by_agent_type"]:
+                    results["by_agent_type"][agent_type] = {"passed": 0, "failed": 0}
+
                 if result["passed"]:
                     results["passed"] += 1
+                    results["by_agent_type"][agent_type]["passed"] += 1
                     status = "✅ PASSED"
                 else:
                     results["failed"] += 1
+                    results["by_agent_type"][agent_type]["failed"] += 1
                     status = "❌ FAILED"
 
                 results["details"].append({
                     "test_file": filename,
                     "folder": folder,
                     "status": status,
+                    "agent_type": agent_type,
                     "checks": result["checks"],
                     "deterministic_truth": result["deterministic_truth"],
                     "ai_response": result["ai_response"],
@@ -61,8 +73,11 @@ def run_suite():
     print(f"\n🏁 SUITE FINISHED 🏁")
     print(f"✅ Passed: {results['passed']}")
     print(f"❌ Failed: {results['failed']}")
-    print(f" Total:  {total}")
-    print(f"📊 Pass Rate: {pass_rate}%\n")
+    print(f"   Total:  {total}")
+    print(f"📊 Pass Rate: {pass_rate}%")
+    for atype, counts in results["by_agent_type"].items():
+        print(f"   [{atype}] Passed: {counts['passed']} | Failed: {counts['failed']}")
+    print()
 
     now = str(datetime.datetime.now())
     results["timestamp"] = now
