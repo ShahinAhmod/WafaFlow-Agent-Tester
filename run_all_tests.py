@@ -23,6 +23,7 @@ def run_suite():
         "test_cases/generated",
         "test_cases/tax",
         "test_cases/payroll",
+        "test_cases/adversarial",
     ]
 
     results = {"passed": 0, "failed": 0, "by_agent_type": {}, "details": []}

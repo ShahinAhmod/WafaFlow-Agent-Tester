@@ -72,6 +72,7 @@ else:
             "ap_match":        "AP 3-Way Match",
             "tax_calculation": "Tax Calculation",
             "payroll":         "Payroll",
+            "adversarial":     "Adversarial / Security",
         }
         type_cols = st.columns(len(by_type))
         for col, (atype, counts) in zip(type_cols, by_type.items()):
@@ -87,7 +88,12 @@ else:
 
     # Agent type filter
     all_types = sorted({t.get("agent_type", "ap_match") for t in data["details"]})
-    AGENT_LABELS = {"ap_match": "AP 3-Way Match", "tax_calculation": "Tax Calculation", "payroll": "Payroll"}
+    AGENT_LABELS = {
+        "ap_match":        "AP 3-Way Match",
+        "tax_calculation": "Tax Calculation",
+        "payroll":         "Payroll",
+        "adversarial":     "Adversarial / Security",
+    }
     filter_options = ["All"] + [AGENT_LABELS.get(t, t) for t in all_types]
     selected_label = st.selectbox("Filter by agent type:", filter_options)
     selected_type  = None if selected_label == "All" else next(
@@ -95,10 +101,12 @@ else:
     )
 
     CHECK_LABELS = {
-        "schema_valid":   "Schema Valid",
-        "status_match":   "Status Match",
-        "numeric_match":  "Numeric Variance",
-        "security_clean": "Security / PII",
+        "schema_valid":       "Schema Valid",
+        "status_match":       "Status Match",
+        "numeric_match":      "Numeric Variance",
+        "security_clean":     "Security / PII",
+        "injection_resisted": "Injection Resisted",
+        "json_only_output":   "JSON-Only Output",
     }
 
     filtered = [

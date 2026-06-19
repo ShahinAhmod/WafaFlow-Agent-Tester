@@ -7,6 +7,7 @@ from pydantic import BaseModel, ValidationError
 from core_engine import calculate_ap_match
 from core_tax_engine import calculate_tax
 from core_payroll_engine import calculate_payroll
+from core_security_engine import check_injection_resistance, check_schema_only_output
 
 client = OpenAI(
     api_key=os.environ.get("DEEPSEEK_API_KEY"),
@@ -48,6 +49,10 @@ AGENT_REGISTRY = {
         "model": PayrollResult,
         "label": "Payroll",
     },
+    "adversarial": {
+        "model": APMatchResult,          # adversarial tests use AP invoices
+        "label": "Adversarial / Security",
+    },
 }
 
 # ── Deterministic truth per agent type ──────────────────────────────────────
@@ -57,7 +62,7 @@ def _get_ground_truth(agent_type: str, context: dict) -> dict:
         return calculate_tax(context["transaction"])
     if agent_type == "payroll":
         return calculate_payroll(context["employee"])
-    # default: ap_match
+    # ap_match and adversarial both use the AP engine
     return calculate_ap_match(
         context["invoice"],
         context["purchase_order"],
@@ -144,10 +149,12 @@ def run_test_case(test_case_path: str) -> dict:
     print(f"AI Raw Response:\n{ai_response_text}\n")
 
     checks = {
-        "schema_valid":   {"passed": False, "detail": ""},
-        "status_match":   {"passed": False, "detail": ""},
-        "numeric_match":  {"passed": True,  "detail": "No numeric field to validate."},
-        "security_clean": {"passed": False, "detail": ""},
+        "schema_valid":        {"passed": False, "detail": ""},
+        "status_match":        {"passed": False, "detail": ""},
+        "numeric_match":       {"passed": True,  "detail": "No numeric field to validate."},
+        "security_clean":      {"passed": False, "detail": ""},
+        "injection_resisted":  {"passed": True,  "detail": "N/A — not an adversarial test."},
+        "json_only_output":    {"passed": True,  "detail": "N/A — not an adversarial test."},
     }
 
     try:
@@ -193,6 +200,19 @@ def run_test_case(test_case_path: str) -> dict:
         else:
             checks["security_clean"] = {"passed": True, "detail": "No PII leakage detected."}
             print("✅ CHECK 3: No PII leakage.")
+
+        # CHECKS 4 & 5 — Adversarial-only security checks
+        if agent_type == "adversarial":
+            sec_config = test_case.get("security_checks", {})
+            injection_phrases = sec_config.get("injection_phrases", [])
+
+            inj = check_injection_resistance(ai_response_text, injection_phrases)
+            checks["injection_resisted"] = inj
+            print(f"{'✅' if inj['passed'] else '⚠️ '} INJECTION CHECK: {inj['detail']}")
+
+            json_only = check_schema_only_output(ai_response_text)
+            checks["json_only_output"] = json_only
+            print(f"{'✅' if json_only['passed'] else '⚠️ '} JSON-ONLY CHECK: {json_only['detail']}")
 
         all_passed = all(c["passed"] for c in checks.values())
 
